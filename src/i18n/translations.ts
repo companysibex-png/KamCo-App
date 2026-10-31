@@ -52,6 +52,13 @@ export const translations = {
     demoCheckoutNote: 'در حالت دمو سفارش شبیه‌سازی می‌شود.',
     error: 'خطایی رخ داد. دوباره تلاش کنید.',
     footer: 'اپ فروشگاه کم‌کو — یک کدبیس، همه پلتفرم‌ها',
+    seo: {
+      homeTitle: 'کم‌کو | فروشگاه اینترنتی مدرن',
+      homeDesc: 'خرید آنلاین کالای دیجیتال، کتاب و لوازم خانه از فروشگاه کم‌کو؛ جستجوی سریع، دسته‌بندی موضوعی و سبد خرید راحت.',
+      cartTitle: 'سبد خرید | کم‌کو',
+      loginTitle: 'ورود و ثبت‌نام | کم‌کو',
+      ordersTitle: 'سفارش‌های من | کم‌کو',
+    },
   },
   en: {
     appName: 'KamCo',
@@ -102,6 +109,13 @@ export const translations = {
     demoCheckoutNote: 'Orders are simulated in demo mode.',
     error: 'Something went wrong. Please try again.',
     footer: 'KamCo storefront app — one codebase, every platform',
+    seo: {
+      homeTitle: 'KamCo Store — modern online shopping',
+      homeDesc: 'Shop electronics, books and home & kitchen essentials at KamCo — fast search, categories and an installable PWA for every platform.',
+      cartTitle: 'Shopping cart | KamCo',
+      loginTitle: 'Sign in | KamCo',
+      ordersTitle: 'My orders | KamCo',
+    },
   },
 } as const
 

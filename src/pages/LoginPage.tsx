@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api, demoState } from '../api/client'
 import { useI18n } from '../i18n/I18nContext'
 import { useAuth } from '../context/AuthContext'
+import { useEffect } from 'react'
+import { setPageSeo } from '../seo'
 
 export function LoginPage() {
   const { t } = useI18n()
@@ -17,6 +19,10 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setPageSeo({ title: t('seo.loginTitle'), description: t('loginHint'), noindex: true })
+  }, [t])
 
   if (user) {
     return (

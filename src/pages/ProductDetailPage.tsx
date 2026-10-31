@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
 import { useI18n } from '../i18n/I18nContext'
 import { useCart } from '../context/CartContext'
+import { setPageSeo, productJsonLd } from '../seo'
 import { ProductImage } from '../components/ProductImage'
 import type { Product } from '../types'
 
@@ -33,6 +34,25 @@ export function ProductDetailPage() {
       cancelled = true
     }
   }, [id])
+
+  // Keep title/description/Product JSON-LD in sync with the loaded product.
+  // (Declared before any early return — Rules of Hooks.)
+  useEffect(() => {
+    if (!product) return
+    const { name, description, price, stockQuantity, categoryName, id } = product
+    setPageSeo({
+      title: `${name} | ${t('appName')}`,
+      description: (description ?? name).slice(0, 160),
+      jsonLd: productJsonLd({
+        name,
+        description: description ?? name,
+        price,
+        inStock: stockQuantity > 0,
+        category: categoryName,
+        url: `https://companysibex-png.github.io/KamCo-App/#/product/${id}`,
+      }),
+    })
+  }, [product, t])
 
   if (loading) return <main className="container page state"><span className="spinner" /> {t('loading')}</main>
   if (!product) return <main className="container page state">{t('emptyProducts')}</main>

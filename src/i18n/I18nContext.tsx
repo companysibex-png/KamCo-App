@@ -31,7 +31,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = lang
     document.documentElement.dir = dir
-    document.title = lang === 'fa' ? 'فروشگاه کم‌کو' : 'KamCo Store'
+    // NOTE: <title> is owned by the per-route SEO helper (src/seo.ts) so each
+    // page can set its own title/description.
   }, [lang, dir])
 
   const setLang = useCallback((next: Lang) => {

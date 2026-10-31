@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { api } from '../api/client'
 import { useI18n } from '../i18n/I18nContext'
 import { useAuth } from '../context/AuthContext'
+import { setPageSeo } from '../seo'
 import type { Order } from '../types'
 
 const statusClass: Record<string, string> = {
@@ -19,6 +20,10 @@ export function OrdersPage() {
 
   const [orders, setOrders] = useState<Order[] | null>(null)
   const [error, setError] = useState(false)
+
+  useEffect(() => {
+    setPageSeo({ title: t('seo.ordersTitle'), description: t('ordersEmpty'), noindex: true })
+  }, [t])
 
   useEffect(() => {
     if (!token) return

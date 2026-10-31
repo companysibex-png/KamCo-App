@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { api } from '../api/client'
 import { demoState } from '../api/client'
 import { useI18n } from '../i18n/I18nContext'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
+import { setPageSeo } from '../seo'
 
 export function CartPage() {
   const { t, lang } = useI18n()
@@ -15,6 +17,10 @@ export function CartPage() {
   const [placing, setPlacing] = useState(false)
   const [placedId, setPlacedId] = useState<number | null>(null)
   const [error, setError] = useState(false)
+
+  useEffect(() => {
+    setPageSeo({ title: t('seo.cartTitle'), description: t('cartEmpty'), noindex: true })
+  }, [t])
 
   const fmt = (n: number) =>
     n.toLocaleString(lang === 'fa' ? 'fa-IR' : 'en-US', { style: 'currency', currency: 'USD' })

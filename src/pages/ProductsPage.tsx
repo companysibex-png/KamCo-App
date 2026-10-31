@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { api } from '../api/client'
 import { useI18n } from '../i18n/I18nContext'
 import { useAuth } from '../context/AuthContext'
+import { setPageSeo } from '../seo'
 import { ProductCard } from '../components/ProductCard'
 import type { Category, PagedResult, Product } from '../types'
 
@@ -40,6 +41,10 @@ export function ProductsPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    setPageSeo({ title: t('seo.homeTitle'), description: t('seo.homeDesc') })
+  }, [t])
 
   const fmt = (n: number) => n.toLocaleString(lang === 'fa' ? 'fa-IR' : 'en-US')
 
