@@ -1,0 +1,5 @@
+# KamCo Store — https://companysibex-png.github.io/KamCo-App/
+User-agent: *
+Allow: /
+
+Sitemap: https://companysibex-png.github.io/KamCo-App/sitemap.xml
