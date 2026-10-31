@@ -61,3 +61,20 @@ export interface ProductQuery {
   pageSize?: number
   sortBy?: 'price_asc' | 'price_desc' | 'name'
 }
+
+/** Payload for POST/PUT /api/products (admin). Mirrors Create/UpdateProductDto. */
+export interface ProductInput {
+  name: string
+  description: string | null
+  price: number
+  stockQuantity: number
+  imageUrl: string | null
+  isActive: boolean
+  categoryId: number
+}
+
+/** Payload for POST/PUT /api/categories (admin). */
+export interface CategoryInput {
+  name: string
+  description: string | null
+}

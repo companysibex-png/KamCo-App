@@ -1,4 +1,4 @@
-import type { Category, Order, Product } from '../types'
+import type { Category, CategoryInput, Order, Product, ProductInput } from '../types'
 
 /**
  * Sample data mirroring the KamCo API seed (see the KamCo repository).
@@ -56,6 +56,41 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 /** In-memory demo state so demo orders also behave realistically. */
 const demoOrders: Order[] = []
 let demoOrderSeq = 1000
+let demoProductSeq = Math.max(...demoProducts.map((p) => p.id))
+let demoCategorySeq = Math.max(...demoCategories.map((c) => c.id))
+
+// Seed a few historical orders (from "other customers") so the admin dashboard
+// has something meaningful to show in demo mode.
+function seedOrders() {
+  const mk = (
+    id: number,
+    status: Order['status'],
+    daysAgo: number,
+    customer: string,
+    lines: { productId: number; quantity: number }[],
+  ): Order => {
+    const items = lines.map((l) => {
+      const p = demoProducts.find((x) => x.id === l.productId)!
+      return { productId: p.id, productName: p.name, quantity: l.quantity, unitPrice: p.price }
+    })
+    return {
+      id,
+      status,
+      totalAmount: items.reduce((s, i) => s + i.unitPrice * i.quantity, 0),
+      createdAt: new Date(Date.now() - daysAgo * 86_400_000).toISOString(),
+      userId: 7,
+      customerName: customer,
+      items,
+    }
+  }
+  demoOrders.push(
+    mk(1001, 'Shipped', 6, 'Neda Ahmadi', [{ productId: 3, quantity: 1 }, { productId: 2, quantity: 2 }]),
+    mk(1002, 'Paid', 3, 'Reza Karimi', [{ productId: 1, quantity: 1 }]),
+    mk(1003, 'Pending', 1, 'Mina Sadeghi', [{ productId: 5, quantity: 2 }, { productId: 6, quantity: 1 }]),
+  )
+  demoOrderSeq = 1003
+}
+seedOrders()
 
 export const demo = {
   async categories(): Promise<Category[]> {
@@ -101,13 +136,16 @@ export const demo = {
     return demoProducts.find((p) => p.id === id) ?? null
   },
 
-  async login(): Promise<{ id: number; fullName: string; email: string; role: string; token: string; expiresAt: string }> {
+  async login(email = ''): Promise<{ id: number; fullName: string; email: string; role: string; token: string; expiresAt: string }> {
     await wait(400)
+    // In demo mode any credentials work. An email containing "admin" logs in
+    // as an Admin so the admin panel can be tried without the real API.
+    const isAdmin = email.toLowerCase().includes('admin')
     return {
       id: 42,
-      fullName: 'Demo User',
-      email: 'demo@kamco.app',
-      role: 'User',
+      fullName: isAdmin ? 'Demo Admin' : 'Demo User',
+      email: email || 'demo@kamco.app',
+      role: isAdmin ? 'Admin' : 'User',
       token: 'demo-token',
       expiresAt: new Date(Date.now() + 3600_000).toISOString(),
     }
@@ -146,6 +184,94 @@ export const demo = {
 
   async myOrders(): Promise<Order[]> {
     await wait(350)
-    return demoOrders
+    return demoOrders.filter((o) => o.userId === 42)
+  },
+
+  // ===== Admin operations (demo implementations) =====
+
+  async allOrders(): Promise<Order[]> {
+    await wait(350)
+    return [...demoOrders].sort((a, b) => b.id - a.id)
+  },
+
+  async updateOrderStatus(id: number, status: Order['status']): Promise<Order> {
+    await wait(300)
+    const order = demoOrders.find((o) => o.id === id)
+    if (!order) throw new Error('Order not found')
+    order.status = status
+    return order
+  },
+
+  async createProduct(input: ProductInput): Promise<Product> {
+    await wait(350)
+    const category = demoCategories.find((c) => c.id === input.categoryId)
+    const product: Product = {
+      id: ++demoProductSeq,
+      name: input.name,
+      description: input.description,
+      price: input.price,
+      stockQuantity: input.stockQuantity,
+      imageUrl: input.imageUrl,
+      isActive: input.isActive,
+      categoryId: input.categoryId,
+      categoryName: category?.name ?? null,
+      createdAt: new Date().toISOString(),
+    }
+    demoProducts.unshift(product)
+    if (category) category.productCount += 1
+    return product
+  },
+
+  async updateProduct(id: number, input: ProductInput): Promise<Product> {
+    await wait(350)
+    const product = demoProducts.find((p) => p.id === id)
+    if (!product) throw new Error('Product not found')
+    const category = demoCategories.find((c) => c.id === input.categoryId)
+    Object.assign(product, {
+      name: input.name,
+      description: input.description,
+      price: input.price,
+      stockQuantity: input.stockQuantity,
+      imageUrl: input.imageUrl,
+      isActive: input.isActive,
+      categoryId: input.categoryId,
+      categoryName: category?.name ?? null,
+    })
+    return product
+  },
+
+  async deleteProduct(id: number): Promise<void> {
+    await wait(300)
+    const idx = demoProducts.findIndex((p) => p.id === id)
+    if (idx === -1) throw new Error('Product not found')
+    const [removed] = demoProducts.splice(idx, 1)
+    const category = demoCategories.find((c) => c.id === removed.categoryId)
+    if (category && category.productCount > 0) category.productCount -= 1
+  },
+
+  async createCategory(input: CategoryInput): Promise<Category> {
+    await wait(300)
+    const category: Category = { id: ++demoCategorySeq, name: input.name, description: input.description, productCount: 0 }
+    demoCategories.push(category)
+    return category
+  },
+
+  async updateCategory(id: number, input: CategoryInput): Promise<Category> {
+    await wait(300)
+    const category = demoCategories.find((c) => c.id === id)
+    if (!category) throw new Error('Category not found')
+    Object.assign(category, { name: input.name, description: input.description })
+    return category
+  },
+
+  async deleteCategory(id: number): Promise<void> {
+    await wait(300)
+    const category = demoCategories.find((c) => c.id === id)
+    if (!category) throw new Error('Category not found')
+    if (category.productCount > 0) {
+      throw new Error(`Category "${category.name}" still has ${category.productCount} product(s).`)
+    }
+    const idx = demoCategories.indexOf(category)
+    demoCategories.splice(idx, 1)
   },
 }

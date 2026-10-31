@@ -1,4 +1,13 @@
-import type { AuthResponse, Category, Order, PagedResult, Product, ProductQuery } from '../types'
+import type {
+  AuthResponse,
+  Category,
+  CategoryInput,
+  Order,
+  PagedResult,
+  Product,
+  ProductInput,
+  ProductQuery,
+} from '../types'
 import { demo } from './demoData'
 
 /**
@@ -125,7 +134,7 @@ export const api = {
       })
     } catch (err) {
       if (err instanceof ApiError) throw err
-      return demo.login()
+      return demo.login(email)
     }
   },
 
@@ -160,6 +169,100 @@ export const api = {
     } catch (err) {
       if (err instanceof ApiError) throw err
       return demo.myOrders()
+    }
+  },
+
+  // ===== Admin endpoints (Admin role required by the API) =====
+
+  async allOrders(token: string | null): Promise<Order[]> {
+    try {
+      return await request<Order[]>('/api/orders', { headers: authHeaders(token) })
+    } catch (err) {
+      if (err instanceof ApiError) throw err
+      return demo.allOrders()
+    }
+  },
+
+  async updateOrderStatus(token: string | null, id: number, status: string): Promise<Order> {
+    try {
+      return await request<Order>(`/api/orders/${id}/status`, {
+        method: 'PATCH',
+        headers: authHeaders(token),
+        body: JSON.stringify({ status }),
+      })
+    } catch (err) {
+      if (err instanceof ApiError) throw err
+      return demo.updateOrderStatus(id, status)
+    }
+  },
+
+  async createProduct(token: string | null, input: ProductInput): Promise<Product> {
+    try {
+      return await request<Product>('/api/products', {
+        method: 'POST',
+        headers: authHeaders(token),
+        body: JSON.stringify(input),
+      })
+    } catch (err) {
+      if (err instanceof ApiError) throw err
+      return demo.createProduct(input)
+    }
+  },
+
+  async updateProduct(token: string | null, id: number, input: ProductInput): Promise<Product> {
+    try {
+      return await request<Product>(`/api/products/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(token),
+        body: JSON.stringify(input),
+      })
+    } catch (err) {
+      if (err instanceof ApiError) throw err
+      return demo.updateProduct(id, input)
+    }
+  },
+
+  async deleteProduct(token: string | null, id: number): Promise<void> {
+    try {
+      await request<void>(`/api/products/${id}`, { method: 'DELETE', headers: authHeaders(token) })
+    } catch (err) {
+      if (err instanceof ApiError) throw err
+      return demo.deleteProduct(id)
+    }
+  },
+
+  async createCategory(token: string | null, input: CategoryInput): Promise<Category> {
+    try {
+      return await request<Category>('/api/categories', {
+        method: 'POST',
+        headers: authHeaders(token),
+        body: JSON.stringify(input),
+      })
+    } catch (err) {
+      if (err instanceof ApiError) throw err
+      return demo.createCategory(input)
+    }
+  },
+
+  async updateCategory(token: string | null, id: number, input: CategoryInput): Promise<Category> {
+    try {
+      return await request<Category>(`/api/categories/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(token),
+        body: JSON.stringify(input),
+      })
+    } catch (err) {
+      if (err instanceof ApiError) throw err
+      return demo.updateCategory(id, input)
+    }
+  },
+
+  async deleteCategory(token: string | null, id: number): Promise<void> {
+    try {
+      await request<void>(`/api/categories/${id}`, { method: 'DELETE', headers: authHeaders(token) })
+    } catch (err) {
+      if (err instanceof ApiError) throw err
+      return demo.deleteCategory(id)
     }
   },
 }

@@ -27,6 +27,9 @@ export function Header() {
             {t('nav.cart')}
             {count > 0 && <span className="cart-badge">{count}</span>}
           </Link>
+          {user?.role === 'Admin' && (
+            <Link to="/admin" className="nav-link admin-link">{t('nav.admin')}</Link>
+          )}
           {user ? (
             <button
               className="nav-link as-button"
